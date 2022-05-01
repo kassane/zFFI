@@ -1,21 +1,19 @@
-use std::ffi::{CStr, CString};
-use std::os::raw::c_char;
-
+#[derive(Clone, Debug)]
 #[repr(C)]
 pub struct Doggo {
     age: i32,
-    name: CString,
+    name: *const u8,
 }
 
 impl Doggo {
     fn new() -> Doggo {
         Doggo {
             age: 1,
-            name: CString::new("My name is Doggo!").unwrap(),
+            name: "My name is Doggo!".as_ptr(),
         }
     }
-    fn call_name(&mut self, name: &CStr) {
-        self.name = CString::new(name.to_str().unwrap()).unwrap();
+    fn call_name(&mut self, name: *const u8) {
+        self.name = name;
     }
 }
 
@@ -26,12 +24,12 @@ impl Default for Doggo {
 }
 
 #[no_mangle]
-pub extern "C" fn call_name(ptr: *mut Doggo, name: *const c_char) {
+pub extern "C" fn call_name(ptr: *mut Doggo, name: *const u8) {
     let call: &mut Doggo = unsafe {
         assert!(!ptr.is_null());
         &mut *ptr
     };
-    call.call_name(unsafe { CStr::from_ptr(name) });
+    call.call_name(name);
 }
 
 #[no_mangle]
