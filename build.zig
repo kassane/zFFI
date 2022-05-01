@@ -1,6 +1,8 @@
 const std = @import("std");
 
 pub fn build(b: *std.build.Builder) void {
+    b.prominent_compile_errors = true; // hide backtrace on compile error
+
     // Standard target options allows the person running `zig build` to choose
     // what target to build for. Here we do not override the defaults, which
     // means any target is allowed, and the default is native. Other options
@@ -14,6 +16,13 @@ pub fn build(b: *std.build.Builder) void {
     const exe = b.addExecutable("zFFI", "src/main.zig");
     exe.setTarget(target);
     exe.setBuildMode(mode);
+    exe.addLibPath("target/release");
+    exe.linkSystemLibraryName("zFFI");
+    exe.linkLibC();
+    exe.addPackage(.{
+        .name = "binding",
+        .path = .{ .path = "generated/binding.zig" },
+    });
     exe.install();
 
     const run_cmd = exe.run();

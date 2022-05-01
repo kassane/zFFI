@@ -2,12 +2,14 @@
 name = "zFFI"
 version = "0.1.0"
 edition = "2021"
-license = "Unlicense"
-license-file = "LICENSE"
 readme = "README.md"
 authors = ["Matheus Catarino <matheus-catarino@hotmail.com>"]
 keywords = ["ffi", "rust", "zig"]
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+build = "build.rs"
 
-[dependencies]
-cbindgen = {git = "https://github.com/kassane/cbindgen", branch = "zig-bindgen" }
+[lib]
+path = "src/lib.rs"
+crate-type = ["lib", "cdylib"]
+
+[build-dependencies]
+cbindgen = { git = "https://github.com/kassane/cbindgen", branch = "zig-bindgen" }

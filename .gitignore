@@ -14,8 +14,11 @@ Cargo.lock
 /target
 
 # Added by zig toolchain
-/zig-cachei/*
-/zig-out/*
+/zig-cache
+/zig-out
+
+# Added by cbindgen
+/generated
 
 # Added by cargo
 #
