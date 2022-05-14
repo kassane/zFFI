@@ -13,6 +13,8 @@ pub fn build(b: *std.build.Builder) void {
     // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall.
     const mode = b.standardReleaseOptions();
 
+    const rustlib = cargo(b);
+
     const exe = b.addExecutable("zFFI", "src/main.zig");
     exe.setTarget(target);
     exe.setBuildMode(mode);
@@ -31,6 +33,8 @@ pub fn build(b: *std.build.Builder) void {
         run_cmd.addArgs(args);
     }
 
+    const cargo_step = b.step("cargo", "Run cargo build");
+    cargo_step.dependOn(&rustlib.step);
     const run_step = b.step("run", "Run the app");
     run_step.dependOn(&run_cmd.step);
 
@@ -40,4 +44,12 @@ pub fn build(b: *std.build.Builder) void {
 
     const test_step = b.step("test", "Run unit tests");
     test_step.dependOn(&exe_tests.step);
+}
+
+fn cargo(b: *std.build.Builder) *std.build.RunStep {
+    return b.addSystemCommand(&[_][]const u8{
+        "cargo",
+        "build",
+        "--release",
+    });
 }
