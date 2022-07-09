@@ -21,10 +21,7 @@ pub fn build(b: *std.build.Builder) void {
     exe.addLibPath("target/release");
     exe.linkSystemLibraryName("zFFI");
     exe.linkLibC();
-    exe.addPackage(.{
-        .name = "binding",
-        .path = .{ .path = "generated/binding.zig" },
-    });
+    exe.addPackagePath("binding", "generated/binding.zig");
     exe.install();
 
     const run_cmd = exe.run();
