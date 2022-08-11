@@ -13,7 +13,7 @@ pub fn main() anyerror!void {
     var dg = binding.Doggo{ .age = 11, .name = "Brutus" };
     const d: ?*binding.Doggo = &dg;
     if (d) |doggo| {
-        print("what your name: {s}\n", .{doggo.name});
+        print("what your name: {s}\n", .{doggo.name.?});
         print("At what age: {}\n", .{doggo.age});
     } else {
         print("it's null\n", .{});

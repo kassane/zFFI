@@ -9,7 +9,7 @@ build = "build.rs"
 
 [lib]
 path = "src/lib.rs"
-crate-type =["lib","dylib"]
+crate-type =["dylib"]
 
 [build-dependencies]
 cbindgen = { git = "https://github.com/kassane/cbindgen", branch = "zig-bindgen" }
