@@ -3,7 +3,7 @@ const binding = @import("binding");
 const print = std.log.info;
 
 pub fn main() anyerror!void {
-    print("Multiply of 5*4={}", .{5 * 4});
+    print("Multiply of 5*4={}", .{binding.mul(5, 4)});
 
     const chars = [_]u8{ 'a', ' ', 'A', 0x09, 0x0A, 0x0D };
 
@@ -21,5 +21,5 @@ pub fn main() anyerror!void {
 }
 
 test "import test" {
-    _ = @import("binding");
+    std.testing.refAllDecls(@This());
 }
