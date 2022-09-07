@@ -10,8 +10,9 @@ pub fn main() anyerror!void {
     for (chars) |char, idx| {
         std.log.warn("{}: is '{c}' whitespace?: {}\n", .{ idx, char, binding.is_whitespace(char) });
     }
-    var dg = binding.Doggo{ .age = 11, .name = "Brutus" };
+    var dg: binding.Doggo = .{ .age = 11, .name = "Doggo" };
     const d: ?*binding.Doggo = &dg;
+    _ = binding.call_name(d, "Brutus");
     if (d) |doggo| {
         print("what your name: {s}\n", .{doggo.name.?});
         print("At what age: {}\n", .{doggo.age});
