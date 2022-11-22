@@ -33,23 +33,12 @@ pub fn build(b: *std.build.Builder) void {
     cargo_step.dependOn(&rustlib.step);
     const run_step = b.step("run", "Run the app");
     run_step.dependOn(&run_cmd.step);
-
-    const tests = b.addTest("src/main.zig");
-    tests.setTarget(target);
-    tests.setBuildMode(mode);
-    tests.addLibraryPath("target/release");
-    tests.linkSystemLibraryName("zFFI");
-    tests.linkLibC();
-    tests.addPackagePath("binding", "generated/binding.zig");
-
-    const test_step = b.step("test", "Run unit tests");
-    test_step.dependOn(&tests.step);
 }
 
 fn cargo(b: *std.build.Builder) *std.build.RunStep {
-    return b.addSystemCommand(&[_][]const u8{
-        "cargo",
-        "build",
-        "--release",
-    });
+    const mode = switch (b.standardReleaseOptions()) {
+        .ReleaseSafe, .ReleaseFast, .ReleaseSmall => "-r",
+        else => "-q",
+    };
+    return b.addSystemCommand(&[_][]const u8{ "cargo", "build", mode });
 }
