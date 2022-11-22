@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: goto-bus-stop/setup-zig@v1
+      - uses: goto-bus-stop/setup-zig@v2
         with:
           version: master
       - uses: actions-rs/toolchain@v1
@@ -16,12 +16,12 @@ jobs:
           override: true
 
       - name: build
-        run: zig build cargo && zig build run
+        run: zig build cargo -Drelease-safe && zig build run -Drelease-safe
   lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: goto-bus-stop/setup-zig@v1
+      - uses: goto-bus-stop/setup-zig@v2
         with:
           version: master
-      - run: rm -fr zig-cache && cargo fmt -- --check && zig fmt --check --ast-check */*.zig
+      - run: rm -fr zig-cache && cargo fmt -- --check && zig fmt --check --ast-check **.zig
