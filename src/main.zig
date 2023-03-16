@@ -7,7 +7,7 @@ pub fn main() anyerror!void {
 
     const chars = [_]u8{ 'a', ' ', 'A', 0x09, 0x0A, 0x0D };
 
-    for (chars) |char, idx| {
+    for (chars, 0..) |char, idx| {
         std.log.warn("{}: is '{c}' whitespace?: {}\n", .{ idx, char, binding.is_whitespace(char) });
     }
     var dg: binding.Doggo = .{ .age = 11, .name = "Doggo" };

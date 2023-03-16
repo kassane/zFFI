@@ -1,7 +1,11 @@
 const std = @import("std");
+const Builder = std.Build.Builder;
+const Mode = std.builtin.Mode;
 
-pub fn build(b: *std.build.Builder) void {
-    b.prominent_compile_errors = true; // hide backtrace on compile error
+pub fn build(b: *Builder) void {
+    // hide backtrace on compile error
+    b.prominent_compile_errors = true;
+
     // Standard target options allows the person running `zig build` to choose
     // what target to build for. Here we do not override the defaults, which
     // means any target is allowed, and the default is native. Other options
@@ -10,17 +14,26 @@ pub fn build(b: *std.build.Builder) void {
 
     // Standard release options allow the person running `zig build` to select
     // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall.
-    const mode = b.standardReleaseOptions();
+    const optimize = b.standardOptimizeOption(.{});
 
-    const rustlib = cargo(b);
+    // Make binding Module
+    const binding = b.createModule(.{
+        .source_file = .{ .path = "generated/binding.zig" },
+    });
 
-    const exe = b.addExecutable("zFFI", "src/main.zig");
-    exe.setTarget(target);
-    exe.setBuildMode(mode);
+    // Call cargo build
+    const rustlib = cargo(b, optimize);
+
+    const exe = b.addExecutable(.{
+        .name = "zFFI",
+        .target = target,
+        .optimize = optimize,
+        .root_source_file = .{ .path = "src/main.zig" },
+    });
     exe.addLibraryPath("target/release");
     exe.linkSystemLibraryName("zFFI");
     exe.linkLibC();
-    exe.addPackagePath("binding", "generated/binding.zig");
+    exe.addModule("binding", binding);
     exe.install();
 
     const run_cmd = exe.run();
@@ -35,10 +48,14 @@ pub fn build(b: *std.build.Builder) void {
     run_step.dependOn(&run_cmd.step);
 }
 
-fn cargo(b: *std.build.Builder) *std.build.RunStep {
-    const mode = switch (b.standardReleaseOptions()) {
+fn cargo(b: *Builder, opt: Mode) *std.build.RunStep {
+    const mode = switch (opt) {
         .ReleaseSafe, .ReleaseFast, .ReleaseSmall => "-r",
-        else => "-q",
+        else => "-v",
     };
-    return b.addSystemCommand(&[_][]const u8{ "cargo", "build", mode });
+    return b.addSystemCommand(&[_][]const u8{
+        "cargo",
+        "build",
+        mode,
+    });
 }
