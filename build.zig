@@ -1,8 +1,8 @@
 const std = @import("std");
-const Builder = std.Build.Builder;
+const Build = std.Build;
 const Mode = std.builtin.Mode;
 
-pub fn build(b: *Builder) void {
+pub fn build(b: *Build) void {
     // hide backtrace on compile error
     b.prominent_compile_errors = true;
 
@@ -48,7 +48,7 @@ pub fn build(b: *Builder) void {
     run_step.dependOn(&run_cmd.step);
 }
 
-fn cargo(b: *Builder, opt: Mode) *std.build.RunStep {
+fn cargo(b: *Build, opt: Mode) *std.build.RunStep {
     const mode = switch (opt) {
         .ReleaseSafe, .ReleaseFast, .ReleaseSmall => "-r",
         else => "-v",
