@@ -3,8 +3,6 @@ const Build = std.Build;
 const Mode = std.builtin.Mode;
 
 pub fn build(b: *Build) void {
-    // hide backtrace on compile error
-    b.prominent_compile_errors = true;
 
     // Standard target options allows the person running `zig build` to choose
     // what target to build for. Here we do not override the defaults, which
