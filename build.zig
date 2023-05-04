@@ -1,6 +1,6 @@
 const std = @import("std");
 const Build = std.Build;
-const Mode = std.builtin.Mode;
+const Mode = std.builtin.OptimizeMode;
 
 pub fn build(b: *Build) void {
 
@@ -32,9 +32,9 @@ pub fn build(b: *Build) void {
     exe.linkSystemLibraryName("zFFI");
     exe.linkLibC();
     exe.addModule("binding", binding);
-    exe.install();
+    b.installArtifact(exe);
 
-    const run_cmd = exe.run();
+    const run_cmd = b.addRunArtifact(exe);
     run_cmd.step.dependOn(b.getInstallStep());
     if (b.args) |args| {
         run_cmd.addArgs(args);
