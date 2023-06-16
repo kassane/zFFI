@@ -28,9 +28,12 @@ pub fn build(b: *Build) void {
         .optimize = optimize,
         .root_source_file = .{ .path = "src/main.zig" },
     });
-    exe.addLibraryPath("target/release");
-    exe.linkSystemLibraryName("zFFI");
-    exe.linkLibC();
+    if (optimize == .Debug)
+        exe.addLibraryPath("target/debug")
+    else
+        exe.addLibraryPath("target/release");
+    exe.linkSystemLibrary("zFFI");
+    exe.linkLibCpp();
     exe.addModule("binding", binding);
     b.installArtifact(exe);
 
@@ -49,7 +52,7 @@ pub fn build(b: *Build) void {
 fn cargo(b: *Build, opt: Mode) *std.build.RunStep {
     const mode = switch (opt) {
         .ReleaseSafe, .ReleaseFast, .ReleaseSmall => "-r",
-        else => "-v",
+        else => "-q",
     };
     return b.addSystemCommand(&[_][]const u8{
         "cargo",
