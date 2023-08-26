@@ -1,6 +1,6 @@
 name: CI
 
-on: [push, pull_request]
+on: [push]
 
 jobs:
   test:
@@ -15,5 +15,5 @@ jobs:
           toolchain: stable
           override: true
 
-      - name: build
-        run: zig build cargo -Doptimize=ReleaseSafe && zig build run -Doptimize=ReleaseSafe
+      - name: build & run
+        run: zig build cargo && zig build run --summary all

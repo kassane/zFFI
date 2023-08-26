@@ -29,9 +29,9 @@ pub fn build(b: *Build) void {
         .root_source_file = .{ .path = "src/main.zig" },
     });
     if (optimize == .Debug)
-        exe.addLibraryPath("target/debug")
+        exe.addLibraryPath(.{ .path = "target/debug" })
     else
-        exe.addLibraryPath("target/release");
+        exe.addLibraryPath(.{ .path = "target/release" });
     exe.linkSystemLibrary("zFFI");
     exe.linkLibCpp();
     exe.addModule("binding", binding);
