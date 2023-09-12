@@ -2,25 +2,13 @@ const std = @import("std");
 const binding = @import("binding");
 const print = std.log.info;
 
-pub fn main() anyerror!void {
-    print("Multiply of 5*4={}", .{binding.mul(5, 4)});
+pub fn main() !void {
+    print("Initializing shared data...\n", .{});
+    binding.init_shared_data();
 
-    const chars = [_]u8{ 'a', ' ', 'A', 0x09, 0x0A, 0x0D };
+    print("Starting Rust Tokio event loop...\n", .{});
+    binding.start_event_loop(10); // Set the counter limit to 10
 
-    for (chars, 0..) |char, idx| {
-        std.log.warn("{}: is '{c}' whitespace?: {}\n", .{ idx, char, binding.is_whitespace(char) });
-    }
-    var dg: binding.Doggo = .{ .age = 11, .name = "Doggo" };
-    const d: ?*binding.Doggo = &dg;
-    _ = binding.call_name(d, "Brutus");
-    if (d) |doggo| {
-        print("what your name: {s}\n", .{doggo.name.?});
-        print("At what age: {}\n", .{doggo.age});
-    } else {
-        print("it's null\n", .{});
-    }
-}
-
-test "import test" {
-    std.testing.refAllDecls(@This());
+    print("Shutting down the Rust Tokio event loop...\n", .{});
+    binding.shutdown_event_loop();
 }

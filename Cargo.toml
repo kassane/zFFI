@@ -13,3 +13,6 @@ crate-type =["staticlib"]
 
 [build-dependencies]
 cbindgen = { git = "https://github.com/kassane/cbindgen", branch = "zig-bindgen" }
+
+[dependencies]
+tokio = { version = "1.32.0", features = ["full"] }

@@ -3,16 +3,13 @@ const Build = std.Build;
 const Mode = std.builtin.OptimizeMode;
 
 pub fn build(b: *Build) void {
-
-    // Standard target options allows the person running `zig build` to choose
-    // what target to build for. Here we do not override the defaults, which
-    // means any target is allowed, and the default is native. Other options
-    // for restricting supported target set are available.
-    const target = b.standardTargetOptions(.{});
-
-    // Standard release options allow the person running `zig build` to select
-    // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall.
+    var target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
+
+    // for Windows overwritten default abi (mingw to msvc)
+    if (target.isWindows()) {
+        target.abi = .msvc; // default to rust
+    }
 
     // Make binding Module
     const binding = b.createModule(.{
@@ -33,8 +30,18 @@ pub fn build(b: *Build) void {
     else
         exe.addLibraryPath(.{ .path = "target/release" });
     exe.linkSystemLibrary("zFFI");
-    exe.linkLibCpp();
+    if (target.isWindows()) {
+        exe.linkSystemLibrary("ws2_32");
+        exe.linkSystemLibrary("bcrypt");
+        exe.linkSystemLibrary("advapi32");
+        exe.linkSystemLibrary("userenv");
+    }
+    if (target.getAbi() == .msvc)
+        exe.linkLibC()
+    else
+        exe.linkLibCpp();
     exe.addModule("binding", binding);
+    exe.step.dependOn(&rustlib.step);
     b.installArtifact(exe);
 
     const run_cmd = b.addRunArtifact(exe);
@@ -49,7 +56,7 @@ pub fn build(b: *Build) void {
     run_step.dependOn(&run_cmd.step);
 }
 
-fn cargo(b: *Build, opt: Mode) *std.build.RunStep {
+fn cargo(b: *Build, opt: Mode) *std.build.Step.Run {
     const mode = switch (opt) {
         .ReleaseSafe, .ReleaseFast, .ReleaseSmall => "-r",
         else => "-q",
