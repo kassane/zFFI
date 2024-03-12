@@ -2,18 +2,17 @@ const std = @import("std");
 const Build = std.Build;
 const Mode = std.builtin.OptimizeMode;
 
-pub fn build(b: *Build) void {
-    var target = b.standardTargetOptions(.{});
+pub fn build(b: *Build) !void {
+    // for Windows overwritten default abi (mingw to msvc)
+    const target = b.standardTargetOptions(.{ .default_target = if (@import("builtin").os.tag == .windows)
+        try std.Target.Query.parse(.{ .arch_os_abi = "native-windows-msvc" })
+    else
+        .{} });
     const optimize = b.standardOptimizeOption(.{});
 
-    // for Windows overwritten default abi (mingw to msvc)
-    if (target.isWindows()) {
-        target.abi = .msvc; // default to rust
-    }
-
     // Make binding Module
-    const binding = b.createModule(.{
-        .source_file = .{ .path = "generated/binding.zig" },
+    const binding = b.addModule("binding", .{
+        .root_source_file = .{ .path = "generated/binding.zig" },
     });
 
     // Call cargo build
@@ -30,17 +29,17 @@ pub fn build(b: *Build) void {
     else
         exe.addLibraryPath(.{ .path = "target/release" });
     exe.linkSystemLibrary("zFFI");
-    if (target.isWindows()) {
+    if (exe.rootModuleTarget().os.tag == .windows) {
         exe.linkSystemLibrary("ws2_32");
         exe.linkSystemLibrary("bcrypt");
         exe.linkSystemLibrary("advapi32");
         exe.linkSystemLibrary("userenv");
     }
-    if (target.getAbi() == .msvc)
+    if (exe.rootModuleTarget().abi == .msvc)
         exe.linkLibC()
     else
         exe.linkLibCpp();
-    exe.addModule("binding", binding);
+    exe.root_module.addImport("binding", binding);
     exe.step.dependOn(&rustlib.step);
     b.installArtifact(exe);
 
@@ -56,14 +55,17 @@ pub fn build(b: *Build) void {
     run_step.dependOn(&run_cmd.step);
 }
 
-fn cargo(b: *Build, opt: Mode) *std.build.Step.Run {
-    const mode = switch (opt) {
+fn cargo(b: *Build, opt: Mode) *Build.Step.Run {
+    const mode: []const u8 = switch (opt) {
         .ReleaseSafe, .ReleaseFast, .ReleaseSmall => "-r",
-        else => "-q",
+        else => "",
     };
-    return b.addSystemCommand(&[_][]const u8{
+    var args = b.addSystemCommand(&[_][]const u8{
         "cargo",
         "build",
-        mode,
+        "-q",
     });
+    if (!std.mem.eql(u8, mode, ""))
+        args.addArg(mode);
+    return args;
 }

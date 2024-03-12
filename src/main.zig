@@ -4,8 +4,8 @@ const binding = @import("binding");
 const log = std.log.scoped(.ffi);
 
 // override the std implementation
-pub const std_options = struct {
-    pub const log_level = .info;
+pub const std_options = .{
+    .log_level = .info,
 };
 
 pub fn main() !void {
